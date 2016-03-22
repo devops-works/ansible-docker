@@ -23,3 +23,16 @@
 - name: Installs docker python support
   pip: name=docker-py state=present
   tags: docker
+
+- name: Adds datadog user to docker group
+  user:
+    name: dd-agent
+    append: yes
+    groups: docker
+  when: datadog_enabled | default(false)
+
+- name: Adds datadog integration
+  template:
+    src: datadog_docker.yaml.j2
+    dest: /etc/dd-agent/conf.d/docker_daemon.yaml
+  notify: Restart datadog-agent

@@ -1,1 +1,1 @@
-- include: docker.yml tags=ansible-docker
+- include: docker.yml tags=docker
