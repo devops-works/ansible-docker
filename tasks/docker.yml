@@ -8,12 +8,12 @@
 
 - name: Adds docker repos
   apt_repository:
-    repo: "deb https://apt.dockerproject.org/repo ubuntu-trusty main"
+    repo: "deb https://apt.dockerproject.org/repo {{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }} main"
     state: present
   tags: docker
 
 - name: Installs docker engine
-  apt: pkg=docker-engine state=present
+  apt: pkg=docker-engine={{ docker_version }} state=present
   tags: docker
 
 - name: Installs pip
@@ -23,6 +23,28 @@
 - name: Installs docker python support
   pip: name=docker-py state=present
   tags: docker
+
+- name: Adds docker options if any (<16.04)
+  lineinfile:
+    dest: /etc/default/docker
+    regexp: "--insecure-registry"
+    line: 'DOCKER_OPTS="$DOCKER_OPTS {{ docker_daemon_options }}"'
+  when: docker_daemon_options != "" and ansible_distribution_version | version_compare('16.04','<')
+  notify: Restart docker
+
+- name: Adds docker options if any 1/2 (16.04+)
+  file:
+    path: /etc/systemd/system/docker.service.d/
+    state: directory
+  when: docker_daemon_options != "" and ansible_distribution_version | version_compare('16.04','>=')
+
+- name: Adds docker options if any 2/2 (16.04+)
+  template:
+    src: systemd_options.conf.j2
+    dest: /etc/systemd/system/docker.service.d/options.conf
+  when: docker_daemon_options != "" and ansible_distribution_version | version_compare('16.04','>=')
+  notify:
+    - Reload systemd
 
 - name: Adds datadog user to docker group
   user:
@@ -35,4 +57,5 @@
   template:
     src: datadog_docker.yaml.j2
     dest: /etc/dd-agent/conf.d/docker_daemon.yaml
+  when: datadog_enabled | default(false)
   notify: Restart datadog-agent
