@@ -15,6 +15,7 @@
 - name: Installs docker engine
   apt: pkg=docker-engine={{ docker_version }} state=present
   tags: docker
+  register: __docker_installed
 
 - name: Installs pip
   apt: name=python-pip state=present
@@ -45,6 +46,15 @@
   when: docker_daemon_options != "" and ansible_distribution_version | version_compare('16.04','>=')
   notify:
     - Reload systemd
+
+- meta: flush_handlers
+  when: __docker_installed|changed
+
+- name: Ensure daemon is started
+  service:
+    name: docker
+    state: started
+  when: __docker_installed|changed
 
 - name: Adds datadog user to docker group
   user:
