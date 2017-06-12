@@ -12,8 +12,13 @@
     state: present
   tags: docker
 
-- name: Installs docker engine
-  apt: pkg=docker-engine={{ docker_version }} state=present
+- name: Installs docker engine & compose
+  apt:
+    pkg: "{{ item }}"
+    state: present
+  with_items:
+    - "docker-engine={{ docker_version }}"
+    - docker-compose
   tags: docker
   register: __docker_installed
 
