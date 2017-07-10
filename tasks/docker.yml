@@ -11,15 +11,22 @@
     state: present
   tags: docker
 
-- name: Installs docker engine & compose
+- name: Installs docker engine
   apt:
     pkg: "{{ item }}"
     state: present
   with_items:
     - "docker-ce={{ docker_version }}"
-    - docker-compose
   tags: docker
   register: __docker_installed
+
+- name: Installs docker compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    user: root
+    group: root
+    mode: 0555
 
 - name: Installs pip
   apt: name=python-pip state=present
