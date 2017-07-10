@@ -16,7 +16,7 @@
     pkg: "{{ item }}"
     state: present
   with_items:
-    - "docker-engine={{ docker_version }}"
+    - "docker-ce={{ docker_version }}"
     - docker-compose
   tags: docker
   register: __docker_installed
