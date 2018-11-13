@@ -12,7 +12,7 @@
 
 - name: Installs docker engine
   apt:
-    pkg: ["docker-ce={{ docker_version }}", "python-pip"]
+    pkg: ["docker-ce={{ docker_version }}", "python-pip", "python-docker"]
     state: present
   tags: docker
   register: __docker_installed
@@ -59,11 +59,10 @@
 
 - name: Flushes handlers
   meta: flush_handlers
-  when: __docker_installed|changed
 
 - name: Ensure daemon is started
   service:
     name: docker
     state: started
-  when: __docker_installed|changed
+  when: __docker_installed is changed
 
