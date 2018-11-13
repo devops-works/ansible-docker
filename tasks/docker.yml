@@ -13,10 +13,8 @@
 
 - name: Installs docker engine
   apt:
-    pkg: "{{ item }}"
+    pkg: ["docker-ce={{ docker_version }}", "python-pip"]
     state: present
-  with_items:
-    - "docker-ce={{ docker_version }}"
   tags: docker
   register: __docker_installed
 
@@ -28,12 +26,10 @@
     group: root
     mode: 0555
 
-- name: Installs pip
-  apt: name=python-pip state=present
-  tags: docker
-
 - name: Installs docker python support
-  pip: name=docker-py state=present
+  pip: 
+    name: docker-py
+    state: present
   tags: docker
 
 - name: Adds docker options if any (<16.04)
@@ -58,7 +54,8 @@
   notify:
     - Reload systemd
 
-- meta: flush_handlers
+- name: Flushes handlers
+  meta: flush_handlers
   when: __docker_installed|changed
 
 - name: Ensure daemon is started
@@ -67,16 +64,3 @@
     state: started
   when: __docker_installed|changed
 
-- name: Adds datadog user to docker group
-  user:
-    name: dd-agent
-    append: yes
-    groups: docker
-  when: datadog_enabled | default(false)
-
-- name: Adds datadog integration
-  template:
-    src: datadog_docker.yaml.j2
-    dest: /etc/dd-agent/conf.d/docker_daemon.yaml
-  when: datadog_enabled | default(false)
-  notify: Restart datadog-agent
