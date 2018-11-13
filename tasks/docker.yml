@@ -17,13 +17,22 @@
   tags: docker
   register: __docker_installed
 
-- name: Installs docker compose
+- name: Installs docker compose (Ubuntu > 18.04)
   get_url:
     url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
     dest: /usr/local/bin/docker-compose
     owner: root
     group: root
     mode: 0555
+  when: ansible_distribution_version | version_compare('18.04','<')
+
+- name: Installs docker compose (Ubuntu <= 18.04)
+  apt:
+    name: docker-compose
+    state: present
+  tags:
+    - docker
+  when: ansible_distribution_version | version_compare('18.04','<=')
 
 - name: Uninstall docker-py module
   pip:
