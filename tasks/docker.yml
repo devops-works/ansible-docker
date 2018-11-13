@@ -1,9 +1,8 @@
-
+---
 - name: Adds docker key
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
-  tags: docker
 
 - name: Adds docker repos
   apt_repository:
@@ -26,11 +25,15 @@
     group: root
     mode: 0555
 
+- name: Uninstall docker-py module
+  pip:
+    name: docker-py
+    state: absent
+
 - name: Installs docker python support
   pip:
-    name: ["docker-py", "docker-compose"]
+    name: ["docker", "docker-compose"]
     state: present
-  tags: docker
 
 - name: Adds docker options if any (<16.04)
   lineinfile:

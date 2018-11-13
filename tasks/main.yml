@@ -1,1 +1,4 @@
-- include: docker.yml tags=docker
+---
+- include_tasks: docker.yml
+  tags:
+    - docker
