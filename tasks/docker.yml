@@ -24,7 +24,7 @@
     owner: root
     group: root
     mode: 0555
-  when: ansible_distribution_version | version_compare('18.04','<')
+  when: ansible_distribution_version is version_compare('18.04','<')
 
 - name: Installs docker compose (Ubuntu <= 18.04)
   apt:
@@ -32,7 +32,7 @@
     state: present
   tags:
     - docker
-  when: ansible_distribution_version | version_compare('18.04','<=')
+  when: ansible_distribution_version is version_compare('18.04','<=')
 
 - name: Uninstall docker-py module
   pip:
@@ -49,20 +49,20 @@
     dest: /etc/default/docker
     regexp: "--insecure-registry"
     line: 'DOCKER_OPTS="$DOCKER_OPTS {{ docker_daemon_options }}"'
-  when: docker_daemon_options != "" and ansible_distribution_version | version_compare('16.04','<')
+  when: docker_daemon_options != "" and ansible_distribution_version is version_compare('16.04','<')
   notify: Restart docker
 
 - name: Adds docker options if any 1/2 (16.04+)
   file:
     path: /etc/systemd/system/docker.service.d/
     state: directory
-  when: docker_daemon_options != "" and ansible_distribution_version | version_compare('16.04','>=')
+  when: docker_daemon_options != "" and ansible_distribution_version is version_compare('16.04','>=')
 
 - name: Adds docker options if any 2/2 (16.04+)
   template:
     src: systemd_options.conf.j2
     dest: /etc/systemd/system/docker.service.d/options.conf
-  when: docker_daemon_options != "" and ansible_distribution_version | version_compare('16.04','>=')
+  when: docker_daemon_options != "" and ansible_distribution_version is  version_compare('16.04','>=')
   notify:
     - Reload systemd
 
