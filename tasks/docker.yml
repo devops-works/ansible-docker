@@ -13,9 +13,15 @@
 - name: Installs docker engine
   apt:
     pkg: ["docker-ce={{ docker_version }}", "python3-pip", "python3-docker", "docker-ce-cli", "containerd.io", "python3-setuptools"]
+    install_recommends: no
     state: present
   tags: docker
   register: __docker_installed
+
+- name: Removes creds helper
+  apt:
+    pkg: golang-docker-credential-helpers
+    state: absent
 
 - name: Installs docker compose (Ubuntu > 18.04)
   get_url:
