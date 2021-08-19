@@ -1,18 +1,18 @@
 ---
 - name: Adds docker key
   apt_key:
-    url: https://download.docker.com/linux/ubuntu/gpg
+    url: https://download.docker.com/linux/{{ docker_compose_version }}/gpg
     state: present
 
 - name: Adds docker repos
   apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_lsb.codename }} stable"
     state: present
   tags: docker
 
 - name: Installs docker engine
   apt:
-    pkg: ["docker-ce={{ docker_version }}", "python3-pip", "python3-docker"]
+    pkg: ["docker-ce={{ docker_version }}", "python3-pip", "python3-docker", "docker-ce-cli", "containerd.io"]
     state: present
   tags: docker
   register: __docker_installed
@@ -24,45 +24,23 @@
     owner: root
     group: root
     mode: 0555
-  when: ansible_distribution_version is version_compare('18.04','>')
-
-- name: Installs docker compose (Ubuntu <= 18.04)
-  apt:
-    name: docker-compose
-    state: present
-  tags:
-    - docker
-  when: ansible_distribution_version is version_compare('18.04','<=')
 
 - name: Uninstall docker-py module
   pip:
     name: docker-py
     state: absent
 
-- name: Installs docker python support
-  pip:
-    name: ["docker", "docker-compose"]
-    state: present
-
-- name: Adds docker options if any (<16.04)
-  lineinfile:
-    dest: /etc/default/docker
-    regexp: "--insecure-registry"
-    line: 'DOCKER_OPTS="$DOCKER_OPTS {{ docker_daemon_options }}"'
-  when: docker_daemon_options != "" and ansible_distribution_version is version_compare('16.04','<')
-  notify: Restart docker
-
-- name: Adds docker options if any 1/2 (16.04+)
+- name: Adds docker options if any 1/2
   file:
     path: /etc/systemd/system/docker.service.d/
     state: directory
-  when: docker_daemon_options != "" and ansible_distribution_version is version_compare('16.04','>=')
+  when: docker_daemon_options != ""
 
-- name: Adds docker options if any 2/2 (16.04+)
+- name: Adds docker options if any 2/2
   template:
     src: systemd_options.conf.j2
     dest: /etc/systemd/system/docker.service.d/options.conf
-  when: docker_daemon_options != "" and ansible_distribution_version is  version_compare('16.04','>=')
+  when: docker_daemon_options != ""
   notify:
     - Reload systemd
 
