@@ -12,7 +12,7 @@
 
 - name: Installs docker engine
   apt:
-    pkg: ["docker-ce={{ docker_version }}", "python3-pip", "python3-docker", "docker-ce-cli", "containerd.io"]
+    pkg: ["docker-ce={{ docker_version }}", "python3-pip", "python3-docker", "docker-ce-cli", "containerd.io", "python3-setuptools"]
     state: present
   tags: docker
   register: __docker_installed
