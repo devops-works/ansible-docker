@@ -30,6 +30,11 @@
     name: docker-py
     state: absent
 
+- name: Installs docker-compose python support
+  pip:
+    name: docker-compose
+    state: present
+
 - name: Adds docker options if any 1/2
   file:
     path: /etc/systemd/system/docker.service.d/
