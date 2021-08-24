@@ -36,6 +36,11 @@
     name: docker-py
     state: absent
 
+- name: Installs websocket
+  apt:
+    pkg: python3-websocket
+    state: present
+
 - name: Installs docker-compose python support
   pip:
     name: docker-compose
