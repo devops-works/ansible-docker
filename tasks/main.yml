@@ -3,8 +3,14 @@
   stat:
     path: /usr/bin/docker
   register: __docker
-
-- include_tasks: docker.yml
   tags:
     - docker
+    
+- include_tasks:
+    file: docker.yml
+    apply:
+      tags:
+        - docker
   when: not __docker.stat.exists
+  tags:
+    - always
