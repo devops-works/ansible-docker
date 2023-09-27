@@ -35,6 +35,7 @@
   pip:
     name: docker-py
     state: absent
+  fail_when: false
 
 - name: Installs websocket
   apt:
