@@ -48,10 +48,10 @@
     pkg: python3-websocket
     state: present
 
-- name: Installs docker-compose python support
-  ansible.builtin.pip:
-    name: docker-compose
-    state: present
+# - name: Installs docker-compose python support
+#   ansible.builtin.pip:
+#     name: docker-compose
+#     state: present
 
 - name: Adds docker options if any 1/2
   ansible.builtin.file:
