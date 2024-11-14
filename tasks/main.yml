@@ -1,12 +1,13 @@
 ---
 - name: Check if docker binary exists
-  stat:
+  ansible.builtin.stat:
     path: /usr/bin/docker
   register: __docker
   tags:
     - docker
-    
-- include_tasks:
+
+- name: Docker tasks
+  ansible.builtin.include_tasks:
     file: docker.yml
     apply:
       tags:

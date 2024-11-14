@@ -1,72 +1,81 @@
 ---
+# yamllint disable rule:line-length
+- name: Adds GPG package
+  ansible.builtin.apt:
+    name: gnupg
+    state: present
+
 - name: Adds docker key
-  apt_key:
+  ansible.builtin.apt_key:
     url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
     state: present
 
 - name: Adds docker repos
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_lsb.codename }} stable"
     state: present
   tags: docker
 
 - name: Installs docker engine
-  apt:
+  ansible.builtin.apt:
     pkg: ["docker-ce={{ docker_version }}", "python3-pip", "python3-docker", "docker-ce-cli", "containerd.io", "python3-setuptools"]
-    install_recommends: no
+    install_recommends: false
     state: present
   tags: docker
   register: __docker_installed
 
 - name: Removes creds helper
-  apt:
+  ansible.builtin.apt:
     pkg: golang-docker-credential-helpers
     state: absent
 
 - name: Installs docker compose (Ubuntu > 18.04)
-  get_url:
+  ansible.builtin.get_url:
     url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
     dest: /usr/local/bin/docker-compose
     owner: root
     group: root
-    mode: 0555
+    mode: "0555"
 
 - name: Uninstall docker-py module
-  pip:
+  ansible.builtin.pip:
     name: docker-py
     state: absent
-  ignore_errors: true
+  register: __docker_py_uninstalled
+  failed_when: __docker_py_uninstalled is failed
 
 - name: Installs websocket
-  apt:
+  ansible.builtin.apt:
     pkg: python3-websocket
     state: present
 
 - name: Installs docker-compose python support
-  pip:
+  ansible.builtin.pip:
     name: docker-compose
     state: present
 
 - name: Adds docker options if any 1/2
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/docker.service.d/
     state: directory
+    mode: "0755"
   when: docker_daemon_options != ""
 
 - name: Adds docker options if any 2/2
-  template:
+  ansible.builtin.template:
     src: systemd_options.conf.j2
     dest: /etc/systemd/system/docker.service.d/options.conf
+    mode: "0644"
   when: docker_daemon_options != ""
   notify:
     - Reload systemd
 
 - name: Flushes handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Ensure daemon is started
-  service:
+  # noqa: no-handler
+  ansible.builtin.service:
     name: docker
     state: started
   when: __docker_installed is changed
-
