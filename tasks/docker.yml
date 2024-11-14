@@ -41,8 +41,7 @@
   ansible.builtin.pip:
     name: docker-py
     state: absent
-  register: __docker_py_uninstalled
-  failed_when: __docker_py_uninstalled is failed
+  failed_when: false
 
 - name: Installs websocket
   ansible.builtin.apt:
