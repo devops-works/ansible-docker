@@ -16,7 +16,7 @@
     state: present
   tags: docker
 
-- name: Uninstall docker-compose
+- name: Uninstall other docker stuff
   ansible.builtin.apt:
     pkg:
       - docker.io
