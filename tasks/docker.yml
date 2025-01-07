@@ -16,9 +16,29 @@
     state: present
   tags: docker
 
+- name: Uninstall docker-compose
+  ansible.builtin.apt:
+    pkg:
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+  failed_when: false
+
 - name: Installs docker engine
   ansible.builtin.apt:
-    pkg: ["docker-ce={{ docker_version }}", "python3-pip", "python3-docker", "docker-ce-cli", "containerd.io", "python3-setuptools"]
+    pkg:
+      - "docker-ce={{ docker_version }}"
+      - docker-ce-cli
+      - docker-compose-plugin
+      - docker-buildx-plugin
+      - containerd.io
+      - python3-pip
+      - python3-docker
+      - python3-setuptools
     install_recommends: false
     state: present
   tags: docker
