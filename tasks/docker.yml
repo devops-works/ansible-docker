@@ -5,6 +5,14 @@
     name: gnupg
     state: present
 
+- name: Ensure keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+    owner: root
+    group: root
+
 - name: Adds docker key
   ansible.builtin.get_url:
     url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
