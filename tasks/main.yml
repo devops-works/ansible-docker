@@ -12,6 +12,6 @@
     apply:
       tags:
         - docker
-  when: not __docker.stat.exists
+  when: __docker is defined and not __docker.stat.exists
   tags:
     - always
